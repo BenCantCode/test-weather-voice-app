@@ -45,7 +45,7 @@ class Weather(object):
         
         print('https://api.darksky.net/forecast/{}/{}'.format(self.config.get('secret').get('api_key'), self.config.get('secret').get('coords')))
 
-        parsed = json.loads(urllib2.urlopen('https://api.darksky.net/forecast/{}/{}'.format(self.config.get('secret').get('api-key'), self.config.get('secret').get('coords'))))
+        parsed = json.loads(urllib2.urlopen('https://api.darksky.net/forecast/{}/{}'.format(self.config.get('secret').get('api-key'), self.config.get('secret').get('coords'))).read())
         sentence = 'It is currently {} degrees.'.format(parsed['currently']['temperature'])
 
         # if need to speak the execution result by tts
@@ -58,7 +58,7 @@ class Weather(object):
         # action code goes here...
         print '[Received] intent: {}'.format(intent_message.intent.intent_name)
 
-        parsed = json.decode(urllib2.urlopen('https://api.darksky.net/forecast/{}/{}'.format(self.config.get('secret').get('api_key'), self.config.get('secret').get('coords'))))
+        parsed = json.loads(urllib2.urlopen('https://api.darksky.net/forecast/{}/{}'.format(self.config.get('secret').get('api-key'), self.config.get('secret').get('coords'))).read())
         sentence = 'The temperature is currently {} degrees.'.format(parsed['currently']['temperature'])
 
         # if need to speak the execution result by tts
