@@ -41,6 +41,9 @@ class Weather(object):
         
         # action code goes here...
         print '[Received] intent: {}'.format(intent_message.intent.intent_name)
+        
+        
+        print('https://api.darksky.net/forecast/{}/{}'.format(self.config.get('secret').get('api-key'), self.config.get('secret').get('coords')))
 
         parsed = json.loads(urllib2.urlopen('https://api.darksky.net/forecast/{}/{}'.format(self.config.get('secret').get('api-key'), self.config.get('secret').get('coords'))))
         sentence = 'It is currently {} degrees.'.format(parsed['currently']['temperature'])
