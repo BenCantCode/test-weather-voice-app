@@ -47,7 +47,8 @@ class Weather(object):
 
         parsed = json.loads(urllib2.urlopen(url).read())
 
-        sentence = 'It is currently {} degrees.'.format(parsed['currently']['temperature'])
+        
+        sentence = 'It is {} outside, with a temperature of {} degrees.'.format(parsed['currently']['summary'], parsed['currently']['temperature'])
 
         # if need to speak the execution result by tts
         hermes.publish_start_session_notification(intent_message.site_id, sentence, "")
@@ -63,7 +64,7 @@ class Weather(object):
 
         parsed = json.loads(urllib2.urlopen(url).read())
         
-        sentence = 'It is {} outside, with a temperature of {} degrees.'.format(parsed['currently']['summary'], parsed['currently']['temperature'])
+        sentence = 'It is currently {} degrees.'.format(parsed['currently']['temperature'])
 
         # if need to speak the execution result by tts
         hermes.publish_start_session_notification(intent_message.site_id, sentence, "")
