@@ -18,9 +18,10 @@ MQTT_IP_ADDR = "localhost"
 MQTT_PORT = 1883
 MQTT_ADDR = "{}:{}".format(MQTT_IP_ADDR, str(MQTT_PORT))
 
+
 class Weather(object):
     """Class used to wrap action code with mqtt connection
-        
+
         Please change the name refering to your application
     """
 
@@ -28,51 +29,48 @@ class Weather(object):
         # get the configuration if needed
         try:
             self.config = SnipsConfigParser.read_configuration_file(CONFIG_INI)
-        except :
+        except:
             self.config = None
 
         # start listening to MQTT
         self.start_blocking()
-        
+
     # --> Sub callback function, one per intent
     def weather_callback(self, hermes, intent_message):
         # terminate the session first if not continue
         hermes.publish_end_session(intent_message.session_id, "")
-        
+
         # action code goes here...
         print '[Received] intent: {}'.format(intent_message.intent.intent_name)
-        
-        
-        url = ('https://api.darksky.net/forecast/{}/{}'.format(self.config.get('secret').get('api_key'), self.config.get('secret').get('coords')))
 
-        parsed = json.loads(urllib2.urlopen(url).read())
+        parsed = self.get_weather()
 
-        
-        sentence = 'It is {} outside, with a temperature of {} degrees.'.format(parsed['currently']['summary'], parsed['currently']['temperature'])
+        sentence = 'It is {} outside, with a temperature of {} degrees.'.format(
+            parsed['currently']['summary'], parsed['currently']['temperature'])
 
         # if need to speak the execution result by tts
-        hermes.publish_start_session_notification(intent_message.site_id, sentence, "")
+        hermes.publish_start_session_notification(
+            intent_message.site_id, sentence, "")
 
     def temperature_callback(self, hermes, intent_message):
         # terminate the session first if not continue
         hermes.publish_end_session(intent_message.session_id, "")
-        
+
         # action code goes here...
         print '[Received] intent: {}'.format(intent_message.intent.intent_name)
 
-        url = ('https://api.darksky.net/forecast/{}/{}'.format(self.config.get('secret').get('api_key'), self.config.get('secret').get('coords')))
+        parsed = self.get_weather()
 
-        parsed = json.loads(urllib2.urlopen(url).read())
-        
-        sentence = 'It is currently {} degrees.'.format(parsed['currently']['temperature'])
+        sentence = 'It is currently {} degrees.'.format(
+            parsed['currently']['temperature'])
 
         # if need to speak the execution result by tts
-        hermes.publish_start_session_notification(intent_message.site_id, sentence, "")
-
+        hermes.publish_start_session_notification(
+            intent_message.site_id, sentence, "")
     # More callback function goes here...
 
     # --> Master callback function, triggered everytime an intent is recognized
-    def master_intent_callback(self,hermes, intent_message):
+    def master_intent_callback(self, hermes, intent_message):
         coming_intent = intent_message.intent.intent_name
         if coming_intent == 'searchWeatherForecast':
             self.weather_callback(hermes, intent_message)
@@ -84,6 +82,22 @@ class Weather(object):
     def start_blocking(self):
         with Hermes(MQTT_ADDR) as h:
             h.subscribe_intents(self.master_intent_callback).start()
+
+    def download_weather(self):
+        url = ('https://api.darksky.net/forecast/{}/{}'.format(self.config.get(
+            'secret').get('api_key'), self.config.get('secret').get('coords')))
+        data = urllib2.urlopen(url).read()
+        with open("weather.json", "wb") as cache:
+            cache.write(data)
+        return json.loads(data)
+
+    def get_weather(self):
+        try:
+            return self.download_weather()
+        except urllib2.URLError:
+            with open('weather.json', 'r') as cache:
+                return json.loads(cache.read())
+
 
 if __name__ == "__main__":
     Weather()
