@@ -53,20 +53,25 @@ class Weather(object):
         current_time = int(time.time())
         sentence = 'An error occured when getting the weather.'
         if(current_time - parsed['currently']['time'] < 60):
+            print("Less than a minute ago, using cached...")
             sentence = 'It is {} outside, with a temperature of {} degrees.'.format(
                 parsed['currently']['summary'], parsed['currently']['temperature'])
         elif(current_time - parsed['currently']['time'] < 172800):  # 48 hours
+            print('Looking for hourly data...')
             for i in parsed['hourly']['data']:
                 if(i['time'] == current_time-(current_time % 3600)):
                     sentence = 'It is {} outside, with a temperature of {} degrees. This hourly data was gathered {}. For more up-to-date information, connect to the internet.'.format(
                         i['summary'], i['temperature'], self.get_readable_date(i['time']))
                 break
+            print("Couldn't find hourly data...")
         else:
+            print("Too late for hourly data, using daily.")
             epoch_today_morning = int((datetime.now().replace(hour=7, minute=0, second=0, microsecond=0) - datetime.utcfromtimestamp(0)).total_seconds())
             for i in parsed['daily']['data']:
                 if(i['time'] == epoch_today_morning):
                     sentence = 'Today, it is supposed to be {} outside, with high of {} and a low of {}. This daily data was gathered {}. For more up-to-date information, connect to the internet.'.format(
                 i['summary'], i['temperatureHigh'], i['temperatureLow'], self.get_readable_date(i['time']))
+            print("Couldn't find daily!")
 
 
         hermes.publish_start_session_notification(
